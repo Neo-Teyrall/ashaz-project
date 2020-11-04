@@ -44,6 +44,9 @@ def creat_counter(T,val = 0) :
     return out
 
 def find_read(read,mat_counter_i,first_pos,pos):
+"""
+Si b > e alors le read ne correspond à aucune position, s'ils sont égaux le read est à la position indiquée par eux. Si e > b il y a plusieurs poisitions au read dont b et e.
+"""
     b , e = get_intervale_read(read, mat_counter_i, first_pos)
     if b > e :
         return None
@@ -71,6 +74,10 @@ def get_position(T,first_pos,index):
 
 
 def get_intervale_read(read,mat_counter_i,first_pos):
+"""
+Fonction prenant en argument d'entrée le read, le compteur et la première position.
+Elle permet de retourner b et e, les positions potentielles du read sur la seq.
+"""
     read = read[::-1]
     b : int = first_pos[read[0]]
     e : int = first_pos[read[0]] + mat_counter_i[-1][read[0]] -1
@@ -82,7 +89,10 @@ def get_intervale_read(read,mat_counter_i,first_pos):
 
 def get_intervale_read_sub(in_read, mat_counter_i,
                            first_pos, subs = 1):
-    
+"""
+Fonction prenant en argument d'entrée le read, le compteur, la première position et le nombre de substitutions acceptées.
+Elle permet de retourner b et e, les positions potentielles du read sur la seq.
+"""
     # initialisation des paraetre
     read = in_read[::-1] 
     AN = ["A","T","C","G"]
@@ -132,6 +142,10 @@ def get_intervale_read_sub(in_read, mat_counter_i,
 
 def get_intervale_read_del(in_read, mat_counter_i, first_pos,
                            dels = 1):
+"""
+Fonction prenant en argument d'entrée le read, le compteur, la première position et le nombre de délétions acceptées.
+Elle permet de retourner b et e, les positions potentielles du read sur la seq.
+"""
     # initialisation des variable.
     in_read_reverse = in_read[::-1]
     read =in_read_reverse
@@ -173,7 +187,10 @@ def get_intervale_read_del(in_read, mat_counter_i, first_pos,
 
 def get_intervale_read_ins(in_read, mat_counter_i, first_pos,
                            inss = 1):
-    print()
+"""
+Fonction prenant en argument d'entrée le read, le compteur, la première position et le nombre d'insertions acceptées.
+Elle permet de retourner b et e, les positions potentielles du read sur la seq.
+"""
     in_read_reverse = in_read[::-1]
     read =in_read_reverse
     AN = ["A","T","C","G"]
@@ -223,6 +240,9 @@ def get_intervale_read_ins(in_read, mat_counter_i, first_pos,
 ###############################################################################
 
 def get_seq(file_path : str):
+"""
+Fonction prenant en argument le chemin vers le fichier fasta contenant la séquence à analyser et la récupère. 
+"""
     seq = ""
     with open(file_path) as filin:
         lines = filin.readlines()
@@ -234,15 +254,18 @@ def get_seq(file_path : str):
 
 
 def get_T(seq:str) -> list:
-    print()
+"""
+Fonction prenant la sequénce en argument. Elle va créer la transformée de Burrows-Wheeler en liant chaque nucléotide de la séquence à une position. 
+Puis en inversant la position de 2 nucléotides si le nucléotide suivant ou la série suivante de nucléotide arrive plus tôt dans l'ordre alphabétique alors que la position est plus élevée.
+"""
     index = [] # creation d'une liste
     seq +=  "$"
     # remplissage de la liste avec une liste [posiiton , character]
     for i, char in enumerate(seq):
-        if i == 0 : # pour la premiere position prendre le dernier charracter
+        if i == 0 : # pour la premiere position prendre le dernier caractere
             c = seq[-1]
         else :
-            c = seq[i-1] # pour les autre le caratere a la position antérieur
+            c = seq[i-1] # pour les autre le caractere a la position antérieur
         add = [i,c]
         index.append(add) # ajouté a la liste
     index  = index[1:] + [index[0]]
@@ -278,6 +301,9 @@ def get_T(seq:str) -> list:
 
 
 def get_mat_counter(T):
+"""
+Prends en argument d'entrée la transformée et lui donne un compteur.
+"""
     out = []
     index = []
     counter_i = creat_counter(T)
@@ -290,6 +316,9 @@ def get_mat_counter(T):
     return(out,index)
 
 def get_first_pos(T):
+"""
+Donne la première position de la transformée
+"""
     sT = copy.deepcopy(T)
     sT.sort()
     out = creat_counter(T,-1)
@@ -309,6 +338,7 @@ if __name__ == "__main__" :
     in_seq= {}
     ok = False
     key = ""
+    # Ouvre le fichier et récupère directement la transformée
     with open("./Hu-1.fasta.bwt") as filin:
         lines = filin.readlines()
         T = list(lines[0][:-1])
@@ -318,6 +348,7 @@ if __name__ == "__main__" :
     ok = False
     key = ""
     in_read = {}
+    # Ouvre un fichier avec tous les reads
     with open("./READSsars_cov_2_1e6.fasta") as filin:
         lines = filin.readlines()
         for i ,line in enumerate(lines):
@@ -332,17 +363,33 @@ if __name__ == "__main__" :
                 string += line[:-1]
         in_read.setdefault(key,string)
 
+    # Récupère la séquence du fichier fasta
     seq = get_seq("./Hu-1.fasta")
+    # Création de la séquence de manière brute 
     seq = "ATATCGT"
+    # Création de la transformée de Burrows-Wheeler
     T = get_T(seq)
 
+    # Création du compteur 
     mat_counter_i,index = get_mat_counter(T)
+    
+    # Récupération de la première position
     first_pos  = get_first_pos(T)
+    
+    # Récupération de l'ensemble des positions
     pos = get_position(T,first_pos,index)
+    
+    # Cherche la ou les positions d'un read précis
     interval = find_read("ATC", mat_counter_i,
                          first_pos, pos)
-
+                         
+    ### Les fonctions suivantes renvoies b et e directement. Il faut donc savoir que : si b > e alors le read ne correspond à aucune position, s'ils sont égaux le read est à la position indiquée par eux. Si e > b il y a plusieurs poisitions au read dont b et e.                     
+    # Cherche la ou les positions d'un read précis                         
     print(get_intervale_read_sub("TACG",mat_counter_i,first_pos))
+    # Cherche la ou les positions d'un read avec subs substitutions
+    print(get_intervale_read_sub("TACG",mat_counter_i,first_pos, subs=1))
+    # Cherche la ou les positions d'un read avec dels déléttions   
     print(get_intervale_read_del("ACCG",mat_counter_i,first_pos,dels = 2))
+    # Cherche la ou les positions d'un read avec inss insertions    
     print(get_intervale_read_ins("AG",mat_counter_i,first_pos,inss = 1))
 
