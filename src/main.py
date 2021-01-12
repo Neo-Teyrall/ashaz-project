@@ -2,9 +2,11 @@ import copy
 import datetime
 import sys
 import argparse
+import re
 
 def get_arguments():
-    """Lecture des arguments
+    """
+    Lecture des arguments
     """
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('-f', metavar='FASTA FILE', nargs='?', help='fichier fasta du génome analysé')
@@ -26,7 +28,8 @@ def get_arguments():
     return args
 
 def read_fastq(fastq):
-    """Lit le fichier <fastq>.fastq passé en paramètre.
+    """
+    Lit le fichier <fastq>.fastq passé en paramètre.
 
     Parametres
     ---------
@@ -37,6 +40,10 @@ def read_fastq(fastq):
     """
     with open(fastq, "r") as filin:
         for line in filin:
+            if re.match(">",line):
+                continue
+            if re.match("@",line):
+                continue
             yield next(filin)[:-1]
 
 
@@ -375,8 +382,7 @@ def get_first_pos(T):
 if __name__ == "__main__" :
 
     args = get_arguments()
-    print(args)
-    if(args.f):
+    if(args.f):# si il y a un fichier d'entrée.
         #Récupère la séquence
         seq = get_seq(args.f)
 
@@ -434,69 +440,3 @@ if __name__ == "__main__" :
                     #print(get_intervale_read_sub("TACG",mat_counter_i,first_pos, subs = args.l))
 
 
-
-
-"""
-if __name__ == "__main__" :
-    in_seq= {}
-    ok = False
-    key = ""
-    
-    # Ouvre le fichier et récupère directement la transformée
-    with open("./Hu-1.fasta.bwt") as filin:
-        lines = filin.readlines()
-        T = list(lines[0][:-1])
-        pos = list(lines[1][:-2].split(" "))
-        for i, p  in enumerate(pos):
-            pos[i] = int(p)
-    ok = False
-    key = ""
-    in_read = {}
-    # Ouvre un fichier avec tous les reads
-    with open("./READSsars_cov_2_1e6.fasta") as filin:
-        lines = filin.readlines()
-        for i ,line in enumerate(lines):
-            if line[0] == ">" :
-                if not ok :
-                    ok = True
-                else:
-                    in_read.setdefault(key,string)
-                key = line[:-1]
-                string = ""
-            else :
-                string += line[:-1]
-        in_read.setdefault(key,string)
-    
-    # Récupère la séquence du fichier fasta
-    seq = get_seq("./Hu-1.fasta")
-    # Création de la séquence de manière brute 
-    seq = "ATATCGT"
-    # Création de la transformée de Burrows-Wheeler
-    T = get_T(seq)
-
-    # Création du compteur 
-    mat_counter_i,index = get_mat_counter(T)
-    
-    # Récupération de la première position
-    first_pos  = get_first_pos(T)
-    
-    # Récupération de l'ensemble des positions
-    pos = get_position(T,first_pos,index)
-    
-    # Cherche la ou les positions d'un read précis
-    print("yololo")
-    interval = find_read("ATC", mat_counter_i, first_pos, pos)
-    print(interval)
-    print("bonjour")
-
-    ### Les fonctions suivantes renvoies b et e directement. Il faut donc savoir que : si b > e alors le read ne correspond à aucune position, s'ils sont égaux le read est à la position indiquée par eux. Si e > b il y a plusieurs poisitions au read dont b et e.                     
-    # Cherche la ou les positions d'un read précis                         
-    print(get_intervale_read_sub("TACG",mat_counter_i,first_pos))
-    # Cherche la ou les positions d'un read avec subs substitutions
-    print(get_intervale_read_sub("TACG",mat_counter_i,first_pos, subs=1))
-    # Cherche la ou les positions d'un read avec dels déléttions   
-    print(get_intervale_read_del("ACCG",mat_counter_i,first_pos,dels = 2))
-    # Cherche la ou les positions d'un read avec inss insertions    
-    print(get_intervale_read_ins("AG",mat_counter_i,first_pos,inss = 1))
-
-"""
