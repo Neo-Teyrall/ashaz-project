@@ -4,17 +4,18 @@ import sys
 import argparse
 
 def get_arguments():
-    """Lecture des arguments
+    """
+    Lecture des arguments
     """
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('-f', metavar='FASTA FILE', nargs='?', help='fichier fasta du génome analysé')
     parser.add_argument('-r', metavar='READ FASTQ FILE', nargs='?', help='fichier fastq des séquences read recherchées')
     parser.add_argument('-o',   metavar='CSV FILE', help='fichier d\'output', default="results.csv")
-    parser.add_argument('-m', default = 1, type=int, help="Recherche read sans mutation")
-    parser.add_argument('-i', default = 0, type=int, help="Recherche read avec insertion")
-    parser.add_argument('-d', default = 0, type=int, help="Recherche read avec deletion")
-    parser.add_argument('-s', default = 0, type=int, help="Recherche read avec substitution")
-    parser.add_argument('-l', default = 1, type=int, help="Taille des insertion/deletion/substitution")
+    parser.add_argument('-m', default = 1, type=int, help="Recherche read sans mutation, mettre à 0 pour désactiver l'option.")
+    parser.add_argument('-i', default = 0, type=int, help="Recherche read avec insertion, mettre à 1 pour activer l'option.")
+    parser.add_argument('-d', default = 0, type=int, help="Recherche read avec deletion, mettre à 1 pour activer l'option.")
+    parser.add_argument('-s', default = 0, type=int, help="Recherche read avec substitution, mettre à 1 pour activer l'option.")
+    parser.add_argument('-l', default = 1, type=int, help="Taille des insertion/deletion/substitution, mettre à 1 pour activer l'option.")
     args = parser.parse_args()
 
     if args.f and args.f[-5:] != "fasta":
